@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">My Tasks</h2>
+    <a href="{{ url_for('add_task') }}" class="btn btn-primary">+ Add Task</a>
+</div>
+
+<!-- Filter / Search -->
+<div class="card mb-4 shadow-sm">
+    <div class="card-body">
+        <form method="GET" class="row g-2 align-items-end">
+            <div class="col-md-4">
+                <label class="form-label small fw-semibold">Search</label>
+                <input type="text" name="search" class="form-control" placeholder="Search tasks..." value="{{ search }}">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label small fw-semibold">Subject</label>
+                <select name="subject" class="form-select">
+                    <option value="">All Subjects</option>
+                    {% for s in subjects %}
+                    <option value="{{ s }}" {% if subject_filter == s %}selected{% endif %}>{{ s }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label small fw-semibold">Priority</label>
+                <select name="priority" class="form-select">
+                    <option value="">All Priorities</option>
+                    <option value="High" {% if priority_filter == 'High' %}selected{% endif %}>High</option>
+                    <option value="Medium" {% if priority_filter == 'Medium' %}selected{% endif %}>Medium</option>
+                    <option value="Low" {% if priority_filter == 'Low' %}selected{% endif %}>Low</option>
+                </select>
+            </div>
+            <div class="col-md-2 d-flex gap-2">
+                <button type="submit" class="btn btn-outline-primary flex-fill">Filter</button>
+                <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary">Clear</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Task Cards -->
+{% if tasks %}
+<div class="row">
+    {% for task in tasks %}
+    {% set diff = task.due_date - now %}
+    {% set overdue = diff.total_seconds() < 0 %}
+    <div class="col-md-6 col-lg-4 mb-3">
+        <div class="card h-100 shadow-sm border-start border-4
+            {% if task.priority == 'High' %}border-danger
+            {% elif task.priority == 'Medium' %}border-warning
+            {% else %}border-success{% endif %}">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <h5 class="card-title mb-0">{{ task.title }}</h5>
+                    <span class="badge ms-2
+                        {% if task.priority == 'High' %}bg-danger
+                        {% elif task.priority == 'Medium' %}bg-warning text-dark
+                        {% else %}bg-success{% endif %}">
+                        {{ task.priority }}
+                    </span>
+                </div>
+                <p class="text-muted small mb-1">{{ task.subject }}</p>
+                {% if task.description %}
+                <p class="card-text small text-secondary">{{ task.description }}</p>
+                {% endif %}
+                <p class="small mb-1"><strong>Due:</strong> {{ task.due_date.strftime('%d %b %Y, %H:%M') }}</p>
+                <p class="small fw-bold mb-0 {% if overdue %}text-danger{% else %}text-primary{% endif %}"
+                   data-countdown="{{ task.due_date.isoformat() }}">
+                    {% if overdue %}Overdue!{% else %}Calculating...{% endif %}
+                </p>
+            </div>
+            <div class="card-footer bg-transparent border-0 d-flex gap-2 pb-3">
+                <a href="{{ url_for('edit_task', task_id=task.id) }}" class="btn btn-sm btn-outline-secondary">Edit</a>
+                <form method="POST" action="{{ url_for('complete_task', task_id=task.id) }}">
+                    <button type="submit" class="btn btn-sm btn-outline-success">Done</button>
+                </form>
+                <form method="POST" action="{{ url_for('delete_task', task_id=task.id) }}"
+                      onsubmit="return confirm('Delete this task?')">
+                    <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="text-center mt-5 text-muted">
+    <p class="fs-5">No tasks found.</p>
+    <a href="{{ url_for('add_task') }}" class="btn btn-primary">Add your first task</a>
+</div>
+{% endif %}
+{% endblock %}
