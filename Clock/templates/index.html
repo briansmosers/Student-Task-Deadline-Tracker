@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forest Study Station</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;800&family=Poppins:wght@300;600&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --glass: rgba(255, 255, 255, 0.1);
+            --blur: blur(12px);
+            --accent: #a8e6cf; /* Soft Mint Green */
+        }
+
+        body, html {
+            margin: 0; padding: 0; height: 100%;
+            font-family: 'Poppins', sans-serif;
+            overflow: hidden; /* Prevent scrollbars */
+        }
+
+        /* Fixed Background Image */
+        .bg-image {
+            position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-image: url("{{ url_for('static', filename='forest.jpg') }}");
+            background-size: cover;
+            background-position: center;
+            z-index: -1;
+            filter: brightness(0.7);
+        }
+
+        /* Clock & Date Area */
+        .main-display {
+            height: 100vh;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            color: white;
+            text-align: center;
+        }
+
+        #digital-clock {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12vw; font-weight: 800;
+            text-shadow: 0 0 30px rgba(0,0,0,0.5);
+            margin-bottom: 0;
+        }
+
+        #current-date {
+            font-size: 2rem; font-weight: 300;
+            letter-spacing: 5px; opacity: 0.9;
+        }
+
+        /* Task List (Bottom Left) */
+        .task-panel {
+            position: fixed; bottom: 40px; left: 40px;
+            width: 320px; background: var(--glass);
+            backdrop-filter: var(--blur);
+            border-radius: 25px; border: 1px solid rgba(255,255,255,0.2);
+            padding: 20px; color: white;
+        }
+
+        .task-input {
+            background: rgba(255,255,255,0.1); border: none;
+            border-radius: 10px; color: white; padding: 8px;
+        }
+
+        .task-item {
+            display: flex; align-items: center; gap: 10px; margin-top: 10px;
+        }
+
+        .task-item input[type="checkbox"] { accent-color: var(--accent); }
+        .completed { text-decoration: line-through; opacity: 0.5; }
+
+        /* Stopwatch (Bottom Right) */
+        .stopwatch-panel {
+            position: fixed; bottom: 40px; right: 40px;
+            background: var(--glass); backdrop-filter: var(--blur);
+            padding: 30px; border-radius: 30px;
+            border: 1px solid rgba(255,255,255,0.2);
+            text-align: center; color: white;
+        }
+
+        #sw-display {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 3rem; font-weight: 800; display: block;
+            margin-bottom: 15px; color: var(--accent);
+        }
+
+        .btn-custom { border-radius: 50px; padding: 8px 20px; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+
+    <div class="bg-image"></div>
+
+    <!-- Main Clock & Date -->
+    <div class="main-display">
+        <h1 id="digital-clock">00:00:00</h1>
+        <div id="current-date">MONDAY, MAY 05</div>
+    </div>
+
+    <!-- Task List (Left) -->
+    <div class="task-panel shadow-lg">
+        <h6 class="fw-bold mb-3">Study Progress</h6>
+        <div class="input-group mb-2">
+            <input type="text" id="taskInput" class="form-control task-input" placeholder="New Task...">
+            <button class="btn btn-sm btn-light" onclick="addTask()">+</button>
+        </div>
+        <div id="taskList"></div>
+    </div>
+
+    <!-- Stopwatch (Right) -->
+    <div class="stopwatch-panel shadow-lg">
+        <span id="sw-display">00:00:00</span>
+        <div class="d-flex gap-2 justify-content-center">
+            <button id="startBtn" class="btn btn-success btn-custom" onclick="toggleSW()">Start Study</button>
+            <button class="btn btn-outline-light btn-custom" onclick="resetSW()">Reset</button>
+        </div>
+    </div>
+
+    <script>
+        // 1. Clock & Date Logic
+        function updateClock() {
+            const now = new Date();
+            const h = String(now.getHours()).padStart(2, '0');
+            const m = String(now.getMinutes()).padStart(2, '0');
+            const s = String(now.getSeconds()).padStart(2, '0');
+            document.getElementById('digital-clock').innerText = `${h}:${m}:${s}`;
+
+            const options = { weekday: 'long', month: 'long', day: 'numeric' };
+            document.getElementById('current-date').innerText = now.toLocaleDateString(undefined, options).toUpperCase();
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // 2. Stopwatch Logic (FIXED RESET)
+        let startTime, timerInterval, elapsedTime = 0, isRunning = false;
+
+        function toggleSW() {
+            if (!isRunning) {
+                startTime = Date.now() - elapsedTime;
+                timerInterval = setInterval(() => {
+                    elapsedTime = Date.now() - startTime;
+                    updateDisplay();
+                }, 100);
+                document.getElementById('startBtn').innerText = "Pause";
+                isRunning = true;
+            } else {
+                clearInterval(timerInterval);
+                document.getElementById('startBtn').innerText = "Resume";
+                isRunning = false;
+            }
+        }
+
+        function resetSW() {
+            clearInterval(timerInterval);
+            elapsedTime = 0;
+            isRunning = false;
+            updateDisplay();
+            document.getElementById('startBtn').innerText = "Start Study";
+        }
+
+        function updateDisplay() {
+            let totalSeconds = Math.floor(elapsedTime / 1000);
+            let h = Math.floor(totalSeconds / 3600);
+            let m = Math.floor((totalSeconds % 3600) / 60);
+            let s = totalSeconds % 60;
+            document.getElementById('sw-display').innerText = 
+                `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+        }
+
+        // 3. Task List Logic
+        function addTask() {
+            const input = document.getElementById('taskInput');
+            if (input.value.trim() === "") return;
+
+            const taskList = document.getElementById('taskList');
+            const div = document.createElement('div');
+            div.className = "task-item";
+            div.innerHTML = `
+                <input type="checkbox" onchange="this.nextSibling.classList.toggle('completed')">
+                <span>${input.value}</span>
+            `;
+            taskList.appendChild(div);
+            input.value = "";
+        }
+    </script>
+</body>
+</html>
