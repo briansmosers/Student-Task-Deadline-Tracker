@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assignment Tracker</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body style="background: #c0c0c0; font-family: 'Courier New', monospace; padding: 20px;">
+    <div style="max-width: 800px; margin: 0 auto;">
+        <h1 style="text-align: center; margin-bottom: 20px;">Assignment Tracker</h1>
+
+        <form action="/add" method="POST" style="background: #c0c0c0; border: 3px outset #fff; padding: 20px; margin-bottom: 20px;">
+            <label>Assignment Name:</label><br>
+            <input type="text" name="task" required style="width: 100%; margin-bottom: 10px;"><br>
+            
+            <label>Due Date:</label><br>
+            <input type="date" name="due" required style="margin-bottom: 10px;"><br>
+            
+            <label>Difficulty:</label><br>
+            <select name="difficulty" style="margin-bottom: 10px;">
+                <option value="Easy">Easy</option>
+                <option value="Medium">Medium</option>
+                <option value="Hard">Hard</option>
+            </select><br>
+            
+            <button type="submit">Add Assignment</button>
+        </form>
+
+        <div style="display: flex; flex-wrap: wrap; gap: 20px;">
+            {% for item in assignments %}
+            <div style="background: #c0c0c0; border: 3px outset #fff; padding: 15px; width: 250px; box-shadow: 5px 5px 0px #000;">
+                <div style="text-align: center; margin-bottom: 10px;">
+                    <span style="background: {% if item.difficulty == 'Hard' %}#ff0000{% elif item.difficulty == 'Medium' %}#ffff00{% else %}#00ff00{% endif %}; padding: 2px 5px; font-weight: bold;">
+                        {{ item.difficulty }}
+                    </span>
+                </div>
+                <h3 style="margin: 0 0 5px 0;">{{ item.task }}</h3>
+                <p style="margin: 0; font-style: italic;">Due: {{ item.due }}</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <br>
+    <a href="{{ url_for('profile') }}">Go to Profile</a>
+</body>
+</html>

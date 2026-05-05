@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+    <body style="background-color:rgb(212, 219, 208);"></body>
+<head>
+    <title>Edit Profile</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="profile-card">
+        <h2>Profile</h2>
+        
+        <div class="pfp-container">
+            <img src="{{ user.pfp_url if user.pfp_url.startswith('/') else url_for('static', filename=user.pfp_url) }}" alt="Profile Photo">
+        </div>
+
+        <p>ID: <span style="color: rgba(255, 3, 3, 0.427);">#000{{ user.id }}</span></p>
+        <p>Username: <strong>{{ user.username }}</strong></p>
+
+        <hr>
+
+        <form method="POST" enctype="multipart/form-data">
+            <input type="text" name="username" placeholder="New Username">
+            <input type="file" name="pfp_file">
+            <button type="submit">UPDATE DATA</button>
+        </form>
+    </div>
+    
+    <br>
+    <a href="{{ url_for('index') }}">Back to Assignments</a>
+</body>
+</html>
