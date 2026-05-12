@@ -6,26 +6,48 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <div class="profile-card">
-        <h2>Profile</h2>
-        
-        <div class="pfp-container">
-            <img src="{{ user.pfp_url if user.pfp_url.startswith('/') else url_for('static', filename=user.pfp_url) }}" alt="Profile Photo">
+    <nav>
+	    <ul>
+		    <li>
+                <button><a href="{{ url_for('index') }}">Back to Assignments</a></button>
+            </li>
+            <li>
+                <button><a href="{{ url_for('stats') }}">Your Stats</a></button>
+            </li>
+            <li>
+                <button><a href="{{ url_for('settings') }}">Settings</a></button>
+            </li>
+            <li>
+                <button>Logout</button>
+            </li>
+            <li>
+                <button>Delete Account</button>
+            </li>
+	    </ul>
+    </nav>
+    <main>
+        <div class="profile-card">
+            <h2>Profile</h2>
+            
+            {% if error %}
+                <p style="color: red;"><strong>{{ error }}</strong></p>
+            {% endif %}
+            
+            <div class="pfp-container">
+                <img src="{{ user.pfp_url if user.pfp_url.startswith('/') else url_for('static', filename=user.pfp_url) }}" alt="Profile Photo">
+            </div>
+
+            <p>ID: <span style="color: rgba(255, 3, 3, 0.427);">#000{{ user.id }}</span></p>
+            <p>Username: <strong>{{ user.username }}</strong></p>
+
+            <hr>
+
+            <form method="POST" enctype="multipart/form-data">
+                <input type="text" name="username" placeholder="New Username">
+                <input type="file" name="pfp_file">
+                <button type="submit">Update Data</button>
+            </form>
         </div>
-
-        <p>ID: <span style="color: rgba(255, 3, 3, 0.427);">#000{{ user.id }}</span></p>
-        <p>Username: <strong>{{ user.username }}</strong></p>
-
-        <hr>
-
-        <form method="POST" enctype="multipart/form-data">
-            <input type="text" name="username" placeholder="New Username">
-            <input type="file" name="pfp_file">
-            <button type="submit">UPDATE DATA</button>
-        </form>
-    </div>
-    
-    <br>
-    <a href="{{ url_for('index') }}">Back to Assignments</a>
+    </main>
 </body>
 </html>

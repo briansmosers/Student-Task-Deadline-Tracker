@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Your Stats</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav>
+	    <ul>
+		    <li>
+                <button><a href="{{ url_for('index') }}">Back to Assignments</a></button>
+            </li>
+            <li>
+                <button><a href="{{ url_for('profile') }}">Profile</a></button>
+            </li>
+            <li>
+                <button><a href="{{ url_for('settings') }}">Settings</a></button>
+            </li>
+            <li>
+                <button>Logout</button>
+            </li>
+            <li>
+                <button>Delete Account</button>
+            </li>
+	    </ul>
+    </nav>
+    <main>
+        <div class="profile-card">
+            <h2>Your Stats</h2>
+            <hr>
+            <p>Username: <strong>{{ user.username }}</strong></p>
+            <p>Total Assignments: <strong>0</strong></p>
+            <p>Completed: <strong>0</strong></p>
+            <p>Pending: <strong>0</strong></p>
+            <hr>
+            <p>Completion Rate: <strong>0%</strong></p>
+        </div>
+    </main>
+</body>
+</html>

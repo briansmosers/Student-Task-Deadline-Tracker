@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Settings</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav>
+	    <ul>
+		    <li>
+                <button><a href="{{ url_for('index') }}">Back to Assignments</a></button>
+            </li>
+            <li>
+                <button><a href="{{ url_for('profile') }}">Profile</a></button>
+            </li>
+            <li>
+                <button><a href="{{ url_for('stats') }}">Your Stats</a></button>
+            </li>
+            <li>
+                <button>Logout</button>
+            </li>
+            <li>
+                <button>Delete Account</button>
+            </li>
+	    </ul>
+    </nav>
+    <main>
+        <div class="profile-card">
+            <h2>Settings</h2>
+            <hr>
+            <p>
+                <label>
+                    <input type="checkbox"> Dark Mode
+                </label>
+            </p>
+            <p>
+                <label>
+                    <input type="checkbox"> Email Notifications
+                </label>
+            </p>
+            <p>
+                <label>
+                    <input type="checkbox"> Public Profile
+                </label>
+            </p>
+            <hr>
+            <button>Save Settings</button>
+        </div>
+    </main>
+</body>
+</html>

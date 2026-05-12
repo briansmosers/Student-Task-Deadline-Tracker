@@ -42,6 +42,10 @@ def profile():
         # 1. Handle Username
         new_username = request.form.get('username')
         if new_username:
+            # Check if username already exists
+            username_exists = any(user['username'] == new_username for user in users if user['id'] != current_user['id'])
+            if username_exists:
+                return render_template('profile.html', user=current_user, error="Username already taken!")
             current_user['username'] = new_username
 
         # 2. Handle File Upload
@@ -73,6 +77,16 @@ def add_assignment():
         assignments.append({"task": task, "due": due, "difficulty": difficulty})
     
     return redirect(url_for('index'))
+
+@app.route('/settings')
+def settings():
+    current_user = users[0]
+    return render_template('settings.html', user=current_user)
+
+@app.route('/stats')
+def stats():
+    current_user = users[0]
+    return render_template('stats.html', user=current_user)
 
 if __name__ == '__main__':
     app.run(debug=True)
