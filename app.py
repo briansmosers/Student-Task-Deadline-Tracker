@@ -1,92 +1,258 @@
-#this is the backend
+ # this is the backend
 
 import os
-from flask import Flask, render_template, request, redirect, url_for
+import sqlite3
+from flask import Flask, render_template, request, redirect, url_for, session
 
 app = Flask(__name__)
+app.secret_key = 'replace-with-a-secure-key'
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
+app.config['DATABASE'] = 'app.db'
 
-# Ensure upload folder exists
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
-users = [
-    {"id": 1, "username": "User0001", "pfp_url": "profile_photo.png"}
-]
 
-user_profile = {
-    "Username" : "ladiesman217",
-    "pfp_url" : "profile_photo.png"
-}
+def get_db():
+    conn = sqlite3.connect(app.config['DATABASE'])
+    conn.row_factory = sqlite3.Row
+    return conn
 
-# Mock database
-assignments = [
-    {"task": "Math Problem Set", "due": "2026-04-25", "difficulty": "Hard"},
-    {"task": "History Essay", "due": "2026-04-30", "difficulty": "Medium"},
-    {"task": "Read Chapter 1", "due": "2026-04-22", "difficulty": "Easy"},
-]
 
-def create_new_user():
-    global user_counter
-    user_counter += 1
-    # formats number to 4 digits, e.g., 2 becomes "0002"
-    new_name = f"User{user_counter:04d}" 
-    new_user = {"id": user_counter, "username": new_name, "pfp_url": "profile_photo.png"}
-    users.append(new_user)
-    return new_user
+def init_db():
+    with get_db() as conn:
+        conn.execute(
+            '''
+            CREATE TABLE IF NOT EXISTS users (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                username TEXT UNIQUE NOT NULL,
+                tag TEXT UNIQUE NOT NULL,
+                pfp_url TEXT NOT NULL,
+                dark_mode INTEGER NOT NULL DEFAULT 0
+            )
+            '''
+        )
+        conn.execute(
+            '''
+            CREATE TABLE IF NOT EXISTS assignments (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                task TEXT NOT NULL,
+                due TEXT NOT NULL,
+                difficulty TEXT NOT NULL,
+                completed INTEGER NOT NULL DEFAULT 0,
+                FOREIGN KEY(user_id) REFERENCES users(id)
+            )
+            '''
+        )
+
+
+@app.before_request
+def setup_database():
+    init_db()
+
+
+def get_user_by_id(user_id):
+    if not user_id:
+        return None
+    row = get_db().execute('SELECT * FROM users WHERE id = ?', (user_id,)).fetchone()
+    return dict(row) if row else None
+
+
+def get_user_by_username_tag(username, tag):
+    row = get_db().execute(
+        'SELECT * FROM users WHERE username = ? AND tag = ?', (username, tag)
+    ).fetchone()
+    return dict(row) if row else None
+
+
+def create_user(username):
+    conn = get_db()
+    try:
+        cursor = conn.execute(
+            'INSERT INTO users (username, pfp_url, dark_mode, tag) VALUES (?, ?, 0, ?)',
+            (username, 'profile_photo.png', '0000')
+        )
+        user_id = cursor.lastrowid
+        tag = str(user_id).zfill(4)
+        conn.execute('UPDATE users SET tag = ? WHERE id = ?', (tag, user_id))
+        conn.commit()
+        return get_user_by_id(user_id)
+    except sqlite3.IntegrityError:
+        return None
+
+
+def get_current_user():
+    return get_user_by_id(session.get('user_id'))
+
+
+def get_assignments_for_user(user_id):
+    rows = get_db().execute(
+        'SELECT * FROM assignments WHERE user_id = ? ORDER BY due', (user_id,)
+    ).fetchall()
+    return [dict(row) for row in rows]
+
+
+def count_assignments(user_id):
+    db = get_db()
+    total = db.execute('SELECT COUNT(*) FROM assignments WHERE user_id = ?', (user_id,)).fetchone()[0]
+    completed = db.execute(
+        'SELECT COUNT(*) FROM assignments WHERE user_id = ? AND completed = 1', (user_id,)
+    ).fetchone()[0]
+    return total, completed
+
+
+@app.route('/')
+def home():
+    user = get_current_user()
+    if not user:
+        return redirect(url_for('login'))
+
+    assignments = get_assignments_for_user(user['id'])
+    return render_template('index.html', user=user, assignments=assignments)
+
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        username = request.form.get('username', '').strip()
+        if not username:
+            return render_template('register.html', error='Please enter a username.')
+
+        user = create_user(username)
+        if not user:
+            return render_template('register.html', error='That username is already in use.')
+
+        session['user_id'] = user['id']
+        return redirect(url_for('home'))
+
+    return render_template('register.html')
+
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form.get('username', '').strip()
+        tag = request.form.get('tag', '').strip()
+
+        user = get_user_by_username_tag(username, tag)
+        if user:
+            session['user_id'] = user['id']
+            return redirect(url_for('home'))
+
+        return render_template('login.html', error='Login failed. Check your username and tag.')
+
+    return render_template('login.html')
+
+
+@app.route('/logout')
+def logout():
+    session.pop('user_id', None)
+    return redirect(url_for('login'))
+
 
 @app.route('/profile', methods=['GET', 'POST'])
 def profile():
-    current_user = users[0] # Using your list logic
-    
-    if request.method == 'POST':
-        # 1. Handle Username
-        new_username = request.form.get('username')
-        if new_username:
-            # Check if username already exists
-            username_exists = any(user['username'] == new_username for user in users if user['id'] != current_user['id'])
-            if username_exists:
-                return render_template('profile.html', user=current_user, error="Username already taken!")
-            current_user['username'] = new_username
+    user = get_current_user()
+    if not user:
+        return redirect(url_for('login'))
 
-        # 2. Handle File Upload
+    if request.method == 'POST':
+        new_username = request.form.get('username', '').strip()
+        if new_username and new_username != user['username']:
+            try:
+                db = get_db()
+                db.execute('UPDATE users SET username = ? WHERE id = ?', (new_username, user['id']))
+                db.commit()
+                user = get_user_by_id(user['id'])
+            except sqlite3.IntegrityError:
+                return render_template('profile.html', user=user, error='Username already taken!')
+
         if 'pfp_file' in request.files:
             file = request.files['pfp_file']
-            if file.filename != '':
-                # Save the file to the uploads folder
+            if file.filename:
                 file_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
                 file.save(file_path)
-                
-                # Update the user data to point to the new local path
-                current_user['pfp_url'] = url_for('static', filename='uploads/' + file.filename)
-        
+                db = get_db()
+                db.execute(
+                    'UPDATE users SET pfp_url = ? WHERE id = ?',
+                    (f'uploads/{file.filename}', user['id'])
+                )
+                db.commit()
+                user = get_user_by_id(user['id'])
+
         return redirect(url_for('profile'))
-    
-    return render_template('profile.html', user=current_user)
 
-@app.route('/')
-def index():
-    return render_template('index.html', assignments=assignments)
+    return render_template('profile.html', user=user)
 
-@app.route('/add', methods=['POST'])
-def add_assignment():
-    task = request.form.get('task')
-    due = request.form.get('due')
-    difficulty = request.form.get('difficulty')
-    
-    if task and due:
-        assignments.append({"task": task, "due": due, "difficulty": difficulty})
-    
-    return redirect(url_for('index'))
 
-@app.route('/settings')
+@app.route('/settings', methods=['GET', 'POST'])
 def settings():
-    current_user = users[0]
-    return render_template('settings.html', user=current_user)
+    user = get_current_user()
+    if not user:
+        return redirect(url_for('login'))
+
+    if request.method == 'POST':
+        dark_mode = 1 if request.form.get('dark_mode') == 'on' else 0
+        db = get_db()
+        db.execute('UPDATE users SET dark_mode = ? WHERE id = ?', (dark_mode, user['id']))
+        db.commit()
+        user = get_user_by_id(user['id'])
+
+    return render_template('settings.html', user=user)
+
 
 @app.route('/stats')
 def stats():
-    current_user = users[0]
-    return render_template('stats.html', user=current_user)
+    user = get_current_user()
+    if not user:
+        return redirect(url_for('login'))
+
+    total, completed = count_assignments(user['id'])
+    pending = total - completed
+    percent = int((completed / total) * 100) if total else 0
+
+    return render_template(
+        'stats.html',
+        user=user,
+        total=total,
+        completed=completed,
+        pending=pending,
+        percent=percent,
+    )
+
+
+@app.route('/add', methods=['POST'])
+def add_assignment():
+    user = get_current_user()
+    if not user:
+        return redirect(url_for('login'))
+
+    task = request.form.get('task', '').strip()
+    due = request.form.get('due', '').strip()
+    difficulty = request.form.get('difficulty', 'Easy').strip()
+
+    if task and due:
+        db = get_db()
+        db.execute(
+            'INSERT INTO assignments (user_id, task, due, difficulty) VALUES (?, ?, ?, ?)',
+            (user['id'], task, due, difficulty),
+        )
+        db.commit()
+
+    return redirect(url_for('home'))
+
+
+@app.route('/delete_account')
+def delete_account():
+    user = get_current_user()
+    if user:
+        db = get_db()
+        db.execute('DELETE FROM assignments WHERE user_id = ?', (user['id'],))
+        db.execute('DELETE FROM users WHERE id = ?', (user['id'],))
+        db.commit()
+        session.pop('user_id', None)
+    return redirect(url_for('register'))
+
 
 if __name__ == '__main__':
     app.run(debug=True)

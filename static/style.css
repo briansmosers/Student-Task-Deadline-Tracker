@@ -93,3 +93,36 @@ nav button {
     width: 100%;
     padding: 10px;
 }
+
+body.dark {
+    background: #111;
+    color: #eee;
+}
+
+body.dark a:link,
+body.dark a:visited {
+    color: #8ecae6;
+}
+
+body.dark .profile-card {
+    background: #222;
+    border-color: #444;
+    color: #eee;
+}
+
+body.dark nav {
+    background: #1d1d1d;
+}
+
+body.dark button {
+    background: #333;
+    color: #fff;
+    border-color: #555;
+}
+
+body.dark input,
+body.dark select {
+    background: #222;
+    color: #eee;
+    border: 1px solid #555;
+}
