@@ -92,6 +92,14 @@ def get_assignments_for_user(user_id):
     return [dict(row) for row in rows]
 
 
+def get_assignment_for_user(assignment_id, user_id):
+    row = get_db().execute(
+        'SELECT * FROM assignments WHERE id = ? AND user_id = ?',
+        (assignment_id, user_id),
+    ).fetchone()
+    return dict(row) if row else None
+
+
 def count_assignments(user_id):
     db = get_db()
     total = db.execute('SELECT COUNT(*) FROM assignments WHERE user_id = ?', (user_id,)).fetchone()[0]
@@ -99,6 +107,36 @@ def count_assignments(user_id):
         'SELECT COUNT(*) FROM assignments WHERE user_id = ? AND completed = 1', (user_id,)
     ).fetchone()[0]
     return total, completed
+
+
+def get_leaderboard():
+    rows = get_db().execute(
+        '''
+        SELECT
+            u.username,
+            COUNT(a.id) AS total_assignments,
+            SUM(CASE WHEN a.completed = 1 THEN 1 ELSE 0 END) AS completed_assignments
+        FROM users u
+        LEFT JOIN assignments a ON a.user_id = u.id
+        GROUP BY u.id
+        ORDER BY
+            CASE WHEN COUNT(a.id) = 0 THEN 0 ELSE SUM(CASE WHEN a.completed = 1 THEN 1 ELSE 0 END) * 1.0 / COUNT(a.id) END DESC,
+            completed_assignments DESC,
+            u.username ASC
+        '''
+    ).fetchall()
+
+    leaderboard = []
+    for row in rows:
+        total_assignments = row['total_assignments']
+        completed_assignments = row['completed_assignments'] or 0
+        completion_rate = int((completed_assignments * 100) / total_assignments) if total_assignments else 0
+        leaderboard.append({
+            'username': row['username'],
+            'total_assignments': total_assignments,
+            'completion_rate': completion_rate,
+        })
+    return leaderboard
 
 
 @app.route('/')
@@ -210,6 +248,7 @@ def stats():
     total, completed = count_assignments(user['id'])
     pending = total - completed
     percent = int((completed / total) * 100) if total else 0
+    leaderboard = get_leaderboard()
 
     return render_template(
         'stats.html',
@@ -218,6 +257,7 @@ def stats():
         completed=completed,
         pending=pending,
         percent=percent,
+        leaderboard=leaderboard,
     )
 
 
@@ -237,6 +277,58 @@ def add_assignment():
             'INSERT INTO assignments (user_id, task, due, difficulty) VALUES (?, ?, ?, ?)',
             (user['id'], task, due, difficulty),
         )
+        db.commit()
+
+    return redirect(url_for('home'))
+
+
+@app.route('/complete_assignment/<int:assignment_id>', methods=['POST'])
+def complete_assignment(assignment_id):
+    user = get_current_user()
+    if not user:
+        return redirect(url_for('login'))
+
+    assignment = get_assignment_for_user(assignment_id, user['id'])
+    if assignment:
+        db = get_db()
+        db.execute(
+            'UPDATE assignments SET completed = 1 WHERE id = ? AND user_id = ?',
+            (assignment_id, user['id']),
+        )
+        db.commit()
+
+    return redirect(url_for('home'))
+
+
+@app.route('/edit_assignment/<int:assignment_id>', methods=['POST'])
+def edit_assignment(assignment_id):
+    user = get_current_user()
+    if not user:
+        return redirect(url_for('login'))
+
+    due = request.form.get('due', '').strip()
+    assignment = get_assignment_for_user(assignment_id, user['id'])
+    if assignment and due:
+        db = get_db()
+        db.execute(
+            'UPDATE assignments SET due = ? WHERE id = ? AND user_id = ?',
+            (due, assignment_id, user['id']),
+        )
+        db.commit()
+
+    return redirect(url_for('home'))
+
+
+@app.route('/delete_assignment/<int:assignment_id>', methods=['POST'])
+def delete_assignment(assignment_id):
+    user = get_current_user()
+    if not user:
+        return redirect(url_for('login'))
+
+    assignment = get_assignment_for_user(assignment_id, user['id'])
+    if assignment:
+        db = get_db()
+        db.execute('DELETE FROM assignments WHERE id = ? AND user_id = ?', (assignment_id, user['id']))
         db.commit()
 
     return redirect(url_for('home'))

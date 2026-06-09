@@ -17,16 +17,34 @@
         </ul>
     </nav>
     <main>
-        <div class="profile-card">
-            <h2>Your Stats</h2>
-            <hr>
-            <p>Username: <strong>{{ user.username }}</strong></p>
-            <p>Tag: <strong>#{{ user.tag }}</strong></p>
-            <p>Total Assignments: <strong>{{ total }}</strong></p>
-            <p>Completed: <strong>{{ completed }}</strong></p>
-            <p>Pending: <strong>{{ pending }}</strong></p>
-            <hr>
-            <p>Completion Rate: <strong>{{ percent }}%</strong></p>
+        <div class="stats-grid">
+            <div class="profile-card">
+                <h2>Your Stats</h2>
+                <hr>
+                <p>Username: <strong>{{ user.username }}</strong></p>
+                <p>Tag: <strong>#{{ user.tag }}</strong></p>
+                <p>Total Assignments: <strong>{{ total }}</strong></p>
+                <p>Completed: <strong>{{ completed }}</strong></p>
+                <p>Pending: <strong>{{ pending }}</strong></p>
+                <hr>
+                <p>Completion Rate: <strong>{{ percent }}%</strong></p>
+            </div>
+            <div class="profile-card leaderboard-card">
+                <h2>Leaderboard</h2>
+                <hr>
+                <ol class="leaderboard-list">
+                    {% for row in leaderboard %}
+                    <li>
+                        <strong>{{ loop.index }}.</strong>
+                        {{ row.username }}
+                        <div class="leaderboard-meta">
+                            <span>{{ row.total_assignments }} tasks</span>
+                            <span>{{ row.completion_rate }}%</span>
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ol>
+            </div>
         </div>
     </main>
 </body>

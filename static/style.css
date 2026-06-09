@@ -11,14 +11,15 @@ a:visited {
 }
 
 body {
+    color: rgb(0, 0, 0);
     display: flex;
     min-height: 100vh;
     margin: 0;
 }
 
 .profile-card {
-    background: #b4baa6; /* Classic grey */
-    border: 3px outset #9cb799; /* 90s button effect */
+    background: #a7b9a3; /* Classic grey */
+    border: 3px outset #777b76; /* 90s button effect */
     padding: 20px;
     width: 350px;
     margin: 20px auto;
@@ -28,14 +29,44 @@ body {
 
 main {
     flex: 1;
-    background-color: #595c58;
+    background-color: #a5a8a4;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
 }
 
-/* The Image Frame */
+.stats-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+}
+
+.leaderboard-card {
+    min-width: 350px;
+}
+
+.leaderboard-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.leaderboard-list li {
+    background: #e0e0d4;
+    border: 2px inset #fff;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+.leaderboard-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9rem;
+    margin-top: 5px;
+}
+
 .pfp-container {
     width: 150px;
     height: 150px;
@@ -55,7 +86,6 @@ main {
     image-rendering: pixelated; 
 }
 
-/* Retro Buttons */
 button {
     background: #86a57d;
     border: 2px outset #83997d90;
@@ -95,8 +125,8 @@ nav button {
 }
 
 body.dark {
-    background: #111;
-    color: #eee;
+    background: #3a3a3c;
+    color: #ffffff;
 }
 
 body.dark a:link,
@@ -120,9 +150,124 @@ body.dark button {
     border-color: #555;
 }
 
+body.dark .leaderboard-list li {
+    color: #000;
+}
+
 body.dark input,
 body.dark select {
     background: #222;
     color: #eee;
     border: 1px solid #555;
+}
+
+body.dark .task-card {
+    background: #2b2b2d;
+    border-color: #444;
+    color: #f0f0f0;
+}
+
+body.dark .task-card h3,
+body.dark .task-card p,
+body.dark .task-card .task-status {
+    color: #f0f0f0;
+}
+
+.task-card {
+    background: #a7b9a3;
+    border: 3px outset #777b76;
+    padding: 15px;
+    width: 250px;
+    box-shadow: 5px 5px 0px #000;
+}
+
+.task-card-badge {
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.task-card-badge span {
+    padding: 2px 5px;
+    font-weight: bold;
+}
+
+.task-card h3 {
+    margin: 0 0 5px 0;
+}
+
+.task-card p {
+    margin: 0;
+    font-style: italic;
+}
+
+.task-card-edit {
+    margin-top: 10px;
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+}
+
+.task-card-edit input[type="date"] {
+    flex: 1 1 auto;
+    min-width: 110px;
+}
+
+.task-card-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.task-card-actions form {
+    flex: 1;
+}
+
+.task-card-actions button,
+.task-card-edit button {
+    width: 100%;
+    padding: 10px 8px;
+    font-weight: bold;
+}
+
+.task-button {
+    display: inline-block;
+    background: #86a57d;
+    border: 2px outset #83997d90;
+    color: #000;
+    cursor: pointer;
+}
+
+.task-button:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+
+.task-card-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.task-card-actions button,
+.task-card-edit button {
+    width: 100%;
+}
+
+.task-card.completed {
+    opacity: 0.75;
+}
+
+.task-card.completed h3,
+.task-card.completed .due-text {
+    text-decoration: line-through;
+}
+
+.task-status {
+    margin: 0 0 10px 0;
+    font-size: 0.9rem;
+    font-weight: bold;
+}
+
+.task-card.completed .task-status {
+    color: #4f5b4f;
 }
