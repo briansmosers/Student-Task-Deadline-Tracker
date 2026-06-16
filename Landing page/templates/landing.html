@@ -6,22 +6,27 @@
     <title>Student Task & Deadline Tracker</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;800&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-    
+
     <style>
         :root {
             --glass: rgba(28, 49, 41, 0.45); /* Darker tint to contrast with the warm room */
             --blur: blur(12px);
-            --accent: #a8e6cf; 
+            --accent: #a8e6cf;
+            --accent-dark: #1c3129;
+        }
+
+        html {
+            scroll-behavior: smooth;
         }
 
         body, html {
-            margin: 0; padding: 0; height: 100%;
+            margin: 0; padding: 0; min-height: 100%;
             font-family: 'Poppins', sans-serif;
             color: white;
-            overflow: hidden;
+            overflow-x: hidden;
         }
 
-        /* Updated to use your cozy study room image */
+        /* Fixed cozy study room background - same crop stays visible at every scroll position */
         .bg-image {
             position: fixed; top: 0; left: 0;
             width: 100%; height: 100%;
@@ -49,6 +54,24 @@
             font-size: 1.2rem;
         }
 
+        .nav-links {
+            gap: 32px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-size: 0.95rem;
+            opacity: 0.8;
+            transition: opacity 0.2s ease, color 0.2s ease;
+        }
+
+        .nav-links a:hover {
+            opacity: 1;
+            color: var(--accent);
+        }
+
         .nav-auth-btn {
             border-radius: 50px;
             padding: 8px 24px;
@@ -57,13 +80,14 @@
             transition: all 0.3s ease;
         }
 
-        /* Centered Hero Presentation */
+        /* Hero */
         .hero-container {
-            height: 100vh;
+            min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 20px;
+            padding: 90px 20px 50px;
+            position: relative;
         }
 
         .hero-panel {
@@ -81,16 +105,17 @@
             font-size: 2.5rem;
             font-weight: 600;
             line-height: 1.3;
-            margin-bottom: 25px;
+            margin-bottom: 0;
             font-family: 'Poppins', sans-serif;
         }
 
-        .hero-panel span {
+        .hero-panel h1 span {
             color: var(--accent);
             font-family: 'JetBrains Mono', monospace;
             display: block;
-            font-size: 1.8rem;
-            margin-top: 10px;
+            font-size: 1.15rem;
+            margin-top: 14px;
+            letter-spacing: 0.5px;
             font-weight: 800;
         }
 
@@ -99,6 +124,196 @@
             font-size: 1.05rem;
             line-height: 1.7;
             font-weight: 300;
+            margin: 25px 0 0;
+        }
+
+        .hero-cta {
+            display: inline-block;
+            margin-top: 30px;
+            background-color: var(--accent);
+            color: var(--accent-dark);
+            border: none;
+            padding: 12px 34px;
+            border-radius: 50px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .hero-cta:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(168,230,207,0.3);
+            color: var(--accent-dark);
+        }
+
+        .scroll-cue {
+            position: absolute;
+            bottom: 28px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            opacity: 0.6;
+            text-decoration: none;
+            font-size: 1.5rem;
+            animation: bounce 2.2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translate(-50%, 0); }
+            50% { transform: translate(-50%, 10px); }
+        }
+
+        /* Shared section layout */
+        .section {
+            padding: 110px 20px;
+            position: relative;
+        }
+
+        .section-inner {
+            max-width: 1080px;
+            margin: 0 auto;
+        }
+
+        .section-eyebrow {
+            display: block;
+            text-align: center;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            font-size: 0.8rem;
+            margin-bottom: 16px;
+            text-shadow: 0 2px 14px rgba(0,0,0,0.35);
+        }
+
+        .section-heading {
+            text-align: center;
+            font-size: 2rem;
+            font-weight: 600;
+            max-width: 680px;
+            margin: 0 auto 60px;
+            line-height: 1.4;
+            text-shadow: 0 2px 14px rgba(0,0,0,0.35);
+        }
+
+        .cta-panel .section-heading {
+            margin-bottom: 18px;
+        }
+
+        /* Features */
+        .feature-card {
+            background: var(--glass);
+            backdrop-filter: var(--blur);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 36px 30px;
+            height: 100%;
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-6px);
+            border-color: rgba(168, 230, 207, 0.45);
+        }
+
+        .feature-icon {
+            font-size: 2.1rem;
+            display: block;
+            margin-bottom: 18px;
+        }
+
+        .feature-card h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .feature-card p {
+            font-size: 0.95rem;
+            line-height: 1.65;
+            opacity: 0.85;
+            font-weight: 300;
+            margin-bottom: 0;
+        }
+
+        /* How it works */
+        .step-number {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: var(--accent);
+            color: var(--accent-dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 800;
+            font-size: 1.3rem;
+            margin: 0 auto 22px;
+        }
+
+        .how-step h3 {
+            font-size: 1.15rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .how-step p {
+            font-size: 0.95rem;
+            opacity: 0.85;
+            font-weight: 300;
+            line-height: 1.65;
+            max-width: 280px;
+            margin: 0 auto;
+        }
+
+        /* CTA */
+        .cta-panel {
+            background: var(--glass);
+            backdrop-filter: var(--blur);
+            border-radius: 30px;
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 60px 45px;
+            max-width: 680px;
+            margin: 0 auto;
+            text-align: center;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+
+        .cta-panel p {
+            opacity: 0.9;
+            font-size: 1.02rem;
+            line-height: 1.65;
+            font-weight: 300;
+            margin: 0 0 28px;
+        }
+
+        /* Footer */
+        .site-footer {
+            text-align: center;
+            padding: 20px 20px 40px;
+            opacity: 0.55;
+            font-size: 0.85rem;
+            font-weight: 300;
+        }
+
+        a:focus-visible, button:focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 3px;
+        }
+
+        @media (max-width: 576px) {
+            .hero-panel { padding: 36px 26px; }
+            .hero-panel h1 { font-size: 1.9rem; }
+            .section { padding: 80px 16px; }
+            .section-heading { font-size: 1.5rem; }
+            .cta-panel { padding: 45px 28px; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            html { scroll-behavior: auto; }
+            .scroll-cue { animation: none; }
+            .feature-card, .hero-cta { transition: none; }
         }
     </style>
 </head>
@@ -107,24 +322,114 @@
     <div class="bg-image"></div>
 
     <nav class="navbar-custom">
-        <a href="#" class="brand-logo">📋 Student Task & Deadline Tracker</a>
+        <a href="#home" class="brand-logo">📋 Student Task & Deadline Tracker</a>
+        <div class="d-none d-md-flex nav-links">
+            <a href="#features">Features</a>
+            <a href="#how-it-works">How It Works</a>
+        </div>
         <div class="d-flex gap-3">
             <a href="/login" class="btn btn-outline-light nav-auth-btn">Sign In</a>
             <a href="/signup" class="btn btn-success nav-auth-btn" style="background-color: var(--accent); border: none; color: #1c3129;">Sign Up</a>
         </div>
     </nav>
 
-    <div class="hero-container">
+    <div class="hero-container" id="home">
         <div class="hero-panel">
-            <h1>Student Task &<br>Deadline Tracker</h1>
+            <h1>Student Task &<br>Deadline Tracker<span>Stay Organized. Stay Ahead.</span></h1>
             <p>
-                Welcome to your dedicated study workspace. This platform brings structural organization to your academic schedule, blending robust assignment workflows with immersive ambient focus elements.
+                Stop juggling sticky notes, group chats, and a dozen browser tabs just to remember what's due. This is one workspace for every assignment across every class, with deadlines that flag themselves before they become a crisis.
             </p>
-            <p class="mb-0">
-                Create clear task lists, track critical deadlines with automated priority indicators, and lock in focus periods using integrated environmental utilities.
-            </p>
+            <a href="/signup" class="hero-cta">Get Started Free</a>
         </div>
+        <a href="#features" class="scroll-cue" aria-label="Scroll to features">⌄</a>
     </div>
+
+    <section class="section" id="features">
+        <div class="section-inner">
+            <span class="section-eyebrow">Features</span>
+            <h2 class="section-heading">Everything you need to stay on top of your coursework</h2>
+            <div class="row g-4">
+                <div class="col-md-6 col-lg-4">
+                    <div class="feature-card">
+                        <span class="feature-icon">🗂️</span>
+                        <h3>Centralized Assignment Hub</h3>
+                        <p>Add every assignment, project, and reading in one place. Tag each task with its course, attach notes or resource links, and edit the details any time requirements change.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="feature-card">
+                        <span class="feature-icon">🚦</span>
+                        <h3>Automated Priority Indicators</h3>
+                        <p>Let the tracker do the math. Each task colors itself by urgency — green with plenty of runway, amber as the date closes in, red once it's overdue or due within a day — so you always know what to open first.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="feature-card">
+                        <span class="feature-icon">🗓️</span>
+                        <h3>Deadline Calendar & Weekly View</h3>
+                        <p>See every due date laid out across a calendar or weekly list, so a packed week of overlapping assignments shows up days in advance, not the night before.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="feature-card">
+                        <span class="feature-icon">🕯️</span>
+                        <h3>Focus Sessions & Ambient Study Mode</h3>
+                        <p>Start a Pomodoro-style timer paired with a calming visual and sound environment, like the cozy study room behind this page, and settle into work that actually gets finished.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="feature-card">
+                        <span class="feature-icon">📈</span>
+                        <h3>Progress Tracking</h3>
+                        <p>Check tasks off as you finish them and watch a simple progress bar climb, by course or across everything on your plate, so momentum is something you can actually see.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="feature-card">
+                        <span class="feature-icon">🔒</span>
+                        <h3>Your Own Private Workspace</h3>
+                        <p>Sign in once and your assignments, notes, and progress travel with you — visible only to you, on whichever device you open next.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="how-it-works">
+        <div class="section-inner">
+            <span class="section-eyebrow">How It Works</span>
+            <h2 class="section-heading">From sign-up to stress-free, in three steps</h2>
+            <div class="row g-4 text-center">
+                <div class="col-md-4 how-step">
+                    <div class="step-number">1</div>
+                    <h3>Create your account</h3>
+                    <p>Sign up and add the courses or subjects you're juggling this term.</p>
+                </div>
+                <div class="col-md-4 how-step">
+                    <div class="step-number">2</div>
+                    <h3>Log your tasks</h3>
+                    <p>Add assignments as they're announced — due date, course, and any notes. Priority sorting takes care of the rest.</p>
+                </div>
+                <div class="col-md-4 how-step">
+                    <div class="step-number">3</div>
+                    <h3>Focus & finish</h3>
+                    <p>Drop into a focus session to work through your list, checking items off as your overdue pile shrinks.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="cta-panel">
+            <h2 class="section-heading">Ready to stop guessing what's due next?</h2>
+            <p>Create your free account and turn a scattered list of deadlines into one clear, prioritized plan.</p>
+            <a href="/signup" class="hero-cta">Sign Up Free</a>
+        </div>
+    </section>
+
+    <footer class="site-footer">
+        📋 Student Task & Deadline Tracker — built to keep your deadlines organized, not overwhelming.
+    </footer>
 
 </body>
 </html>
