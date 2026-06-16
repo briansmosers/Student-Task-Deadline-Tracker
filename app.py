@@ -260,6 +260,21 @@ def stats():
         leaderboard=leaderboard,
     )
 
+@app.route('/dashboard')
+def dashboard():
+    user = get_current_user()
+    if not user:
+        return redirect(url_for('login'))
+    
+    return render_template('dashboard.html', user=user)
+
+@app.route('/clock')
+def clock():
+    user = get_current_user()
+    if not user:
+        return redirect(url_for('login'))
+    
+    return render_template('clock.html', user=user)
 
 @app.route('/add', methods=['POST'])
 def add_assignment():
