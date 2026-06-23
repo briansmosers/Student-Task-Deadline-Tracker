@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Assignment Tracker</title>
+    <title>assignment tracker</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body class="{{ 'dark' if user and user.dark_mode else '' }}">
@@ -13,8 +13,9 @@
             <li><button><a href="{{ url_for('profile') }}">Profile</a></button></li>
             <li><button><a href="{{ url_for('settings') }}">Settings</a></button></li>
             <li><button><a href="{{ url_for('stats') }}">Your Stats</a></button></li>
+            <li><button><a href="{{ url_for('clock') }}">Study Sessions</a></button></li>
+            <li><button><a href="{{ url_for('dashboard') }}">Home</a></button></li>
             <li><button><a href="{{ url_for('logout') }}">Logout</a></button></li>
-            <li><button><a href="{{ url_for('dashboard') }}">Dashboard</a></button></li>
         </ul>
     </nav>
 

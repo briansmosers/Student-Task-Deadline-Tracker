@@ -17,6 +17,17 @@ body {
     margin: 0;
 }
 
+@font-face {
+    font-family : "Radiohead";
+    src: url("uploads/font/EUROSWH.ttf") format("truetype");
+    font-weight: normal;
+    font-style: normal;
+}
+
+h1 {
+    font-family:"Radiohead", sans-serif;
+}
+
 .profile-card {
     background: #a7b9a3; /* Classic grey */
     border: 3px outset #777b76; /* 90s button effect */
