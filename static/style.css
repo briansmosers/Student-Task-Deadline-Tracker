@@ -19,12 +19,17 @@ body {
 
 @font-face {
     font-family : "Radiohead";
-    src: url("uploads/font/EUROSWH.ttf") format("truetype");
+    src: url("uploads/EUROSWH.ttf") format("truetype");
     font-weight: normal;
     font-style: normal;
 }
 
 h1 {
+    font-family:"Radiohead", sans-serif;
+    color: rgb(30, 35, 30)
+}
+
+h2,h3,h4,h5,h6 {
     font-family:"Radiohead", sans-serif;
 }
 
@@ -103,6 +108,48 @@ button {
     cursor: pointer;
     padding: 5px 10px;
     font-weight: bold;
+}
+
+.settings-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.settings-actions > * {
+    width: 100%;
+}
+
+.settings-link {
+    display: block;
+    width: 100%;
+    text-align: center;
+    background: #7b8b74;
+    border: 2px outset #83997d90;
+    color: white;
+    padding: 5px 10px;
+    font-weight: bold;
+    text-decoration: none;
+    box-sizing: border-box;
+}
+
+.danger-btn {
+    background: #483737;
+    color: white;
+    width: 100%;
+}
+
+body.dark .settings-link {
+    background: #363638;
+    color: #f5f5f5;
+    border-color: #666;
+}
+
+body.dark .danger-btn {
+    background: #413232;
+    color: #f5f5f5;
+    border-color: #666;
 }
 
 button:active {

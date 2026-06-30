@@ -12,23 +12,31 @@
             <li><button><a href="{{ url_for('home') }}">Back to Assignments</a></button></li>
             <li><button><a href="{{ url_for('profile') }}">Profile</a></button></li>
             <li><button><a href="{{ url_for('stats') }}">Your Stats</a></button></li>
-            <li><button><a href="{{ url_for('logout') }}">Logout</a></button></li>
-            <li><button><a href="{{ url_for('delete_account') }}">Delete Account</a></button></li>
+            <li><button><a href="{{ url_for('clock') }}">Study Sessions</a></button></li>
         </ul>
     </nav>
     <main>
         <div class="profile-card">
             <h2>Settings</h2>
             <hr>
-            <form method="POST">
-                <p>
-                    <label>
-                        <input type="checkbox" name="dark_mode" {% if user.dark_mode %}checked{% endif %}> Dark Mode
-                    </label>
-                </p>
-                <hr>
-                <button type="submit">Save Settings</button>
-            </form>
+            <div class="settings-actions">
+                <form method="POST" action="{{ url_for('settings') }}">
+                    <p>
+                        <label>
+                            <input type="checkbox" name="dark_mode" {% if user.dark_mode %}checked{% endif %}> Dark Mode
+                        </label>
+                    </p>
+                    <button type="submit">Save Settings</button>
+                </form>
+
+                <form method="POST" action="{{ url_for('logout') }}" onsubmit="return confirm('Are you sure?');">
+                    <button type="submit" class="danger-btn">Logout</button>
+                </form>
+
+                <form method="POST" action="{{ url_for('delete_account') }}" onsubmit="return confirm('Delete your account permanently?');">
+                    <button type="submit" class="danger-btn">Delete Account</button>
+                </form>
+            </div>
         </div>
     </main>
 </body>

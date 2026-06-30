@@ -182,7 +182,7 @@ def login():
     return render_template('login.html')
 
 
-@app.route('/logout')
+@app.route('/logout', methods=['GET', 'POST'])
 def logout():
     session.pop('user_id', None)
     return redirect(url_for('login'))
@@ -349,7 +349,7 @@ def delete_assignment(assignment_id):
     return redirect(url_for('home'))
 
 
-@app.route('/delete_account')
+@app.route('/delete_account', methods=['GET', 'POST'])
 def delete_account():
     user = get_current_user()
     if user:
