@@ -44,6 +44,9 @@ def init_db():
             )
             '''
         )
+        columns = [row['name'] for row in conn.execute("PRAGMA table_info(assignments)").fetchall()]
+        if 'archived' not in columns:
+            conn.execute('ALTER TABLE assignments ADD COLUMN archived INTEGER NOT NULL DEFAULT 0')
 
 
 @app.before_request
@@ -87,7 +90,14 @@ def get_current_user():
 
 def get_assignments_for_user(user_id):
     rows = get_db().execute(
-        'SELECT * FROM assignments WHERE user_id = ? ORDER BY due', (user_id,)
+        'SELECT * FROM assignments WHERE user_id = ? AND archived = 0 ORDER BY due', (user_id,)
+    ).fetchall()
+    return [dict(row) for row in rows]
+
+
+def get_archived_assignments_for_user(user_id):
+    rows = get_db().execute(
+        'SELECT * FROM assignments WHERE user_id = ? AND archived = 1 ORDER BY due DESC', (user_id,)
     ).fetchall()
     return [dict(row) for row in rows]
 
@@ -114,6 +124,7 @@ def get_leaderboard():
         '''
         SELECT
             u.username,
+            u.pfp_url,
             COUNT(a.id) AS total_assignments,
             SUM(CASE WHEN a.completed = 1 THEN 1 ELSE 0 END) AS completed_assignments
         FROM users u
@@ -133,6 +144,7 @@ def get_leaderboard():
         completion_rate = int((completed_assignments * 100) / total_assignments) if total_assignments else 0
         leaderboard.append({
             'username': row['username'],
+            'pfp_url': row['pfp_url'],
             'total_assignments': total_assignments,
             'completion_rate': completion_rate,
         })
@@ -143,10 +155,15 @@ def get_leaderboard():
 def home():
     user = get_current_user()
     if not user:
-        return redirect(url_for('login'))
+        return redirect(url_for('index'))
 
     assignments = get_assignments_for_user(user['id'])
     return render_template('index.html', user=user, assignments=assignments)
+
+
+@app.route('/index')
+def index():
+    return render_template('index.html')
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -161,7 +178,7 @@ def register():
             return render_template('register.html', error='That username is already in use.')
 
         session['user_id'] = user['id']
-        return redirect(url_for('home'))
+        return redirect(url_for('dashboard'))
 
     return render_template('register.html')
 
@@ -175,17 +192,17 @@ def login():
         user = get_user_by_username_tag(username, tag)
         if user:
             session['user_id'] = user['id']
-            return redirect(url_for('home'))
+            return redirect(url_for('dashboard'))
 
         return render_template('login.html', error='Login failed. Check your username and tag.')
 
     return render_template('login.html')
 
 
-@app.route('/logout')
+@app.route('/logout', methods=['GET', 'POST'])
 def logout():
     session.pop('user_id', None)
-    return redirect(url_for('login'))
+    return redirect(url_for('index'))
 
 
 @app.route('/profile', methods=['GET', 'POST'])
@@ -220,21 +237,15 @@ def profile():
 
         return redirect(url_for('profile'))
 
-    return render_template('profile.html', user=user)
+    archived_assignments = get_archived_assignments_for_user(user['id'])
+    return render_template('profile.html', user=user, archived_assignments=archived_assignments)
 
 
-@app.route('/settings', methods=['GET', 'POST'])
+@app.route('/settings')
 def settings():
     user = get_current_user()
     if not user:
         return redirect(url_for('login'))
-
-    if request.method == 'POST':
-        dark_mode = 1 if request.form.get('dark_mode') == 'on' else 0
-        db = get_db()
-        db.execute('UPDATE users SET dark_mode = ? WHERE id = ?', (dark_mode, user['id']))
-        db.commit()
-        user = get_user_by_id(user['id'])
 
     return render_template('settings.html', user=user)
 
@@ -266,7 +277,8 @@ def dashboard():
     if not user:
         return redirect(url_for('login'))
     
-    return render_template('dashboard.html', user=user)
+    assignments = get_assignments_for_user(user['id'])
+    return render_template('dashboard.html', user=user, assignments=assignments)
 
 @app.route('/clock')
 def clock():
@@ -275,6 +287,15 @@ def clock():
         return redirect(url_for('login'))
     
     return render_template('clock.html', user=user)
+
+
+@app.route('/more')
+def more():
+    return render_template('more.html')
+
+@app.route('/help')
+def help():
+    return render_template('help.html')
 
 @app.route('/add', methods=['POST'])
 def add_assignment():
@@ -294,7 +315,7 @@ def add_assignment():
         )
         db.commit()
 
-    return redirect(url_for('home'))
+    return redirect(url_for('dashboard'))
 
 
 @app.route('/complete_assignment/<int:assignment_id>', methods=['POST'])
@@ -312,7 +333,25 @@ def complete_assignment(assignment_id):
         )
         db.commit()
 
-    return redirect(url_for('home'))
+    return redirect(url_for('dashboard'))
+
+
+@app.route('/archive_assignment/<int:assignment_id>', methods=['POST'])
+def archive_assignment(assignment_id):
+    user = get_current_user()
+    if not user:
+        return redirect(url_for('login'))
+
+    assignment = get_assignment_for_user(assignment_id, user['id'])
+    if assignment and assignment['completed']:
+        db = get_db()
+        db.execute(
+            'UPDATE assignments SET archived = 1 WHERE id = ? AND user_id = ?',
+            (assignment_id, user['id']),
+        )
+        db.commit()
+
+    return redirect(url_for('dashboard'))
 
 
 @app.route('/edit_assignment/<int:assignment_id>', methods=['POST'])
@@ -331,7 +370,7 @@ def edit_assignment(assignment_id):
         )
         db.commit()
 
-    return redirect(url_for('home'))
+    return redirect(url_for('dashboard'))
 
 
 @app.route('/delete_assignment/<int:assignment_id>', methods=['POST'])
@@ -346,10 +385,10 @@ def delete_assignment(assignment_id):
         db.execute('DELETE FROM assignments WHERE id = ? AND user_id = ?', (assignment_id, user['id']))
         db.commit()
 
-    return redirect(url_for('home'))
+    return redirect(url_for('dashboard'))
 
 
-@app.route('/delete_account')
+@app.route('/delete_account', methods=['GET', 'POST'])
 def delete_account():
     user = get_current_user()
     if user:
@@ -358,7 +397,7 @@ def delete_account():
         db.execute('DELETE FROM users WHERE id = ?', (user['id'],))
         db.commit()
         session.pop('user_id', None)
-    return redirect(url_for('register'))
+    return redirect(url_for('index'))
 
 
 if __name__ == '__main__':

@@ -1,73 +1,23 @@
 <!DOCTYPE html>
-<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>assignment tracker</title>
+    <title>Dashboard</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-<body class="{{ 'dark' if user and user.dark_mode else '' }}">
-
-    <nav>
-        <ul>
-            <li><button><a href="{{ url_for('profile') }}">Profile</a></button></li>
-            <li><button><a href="{{ url_for('settings') }}">Settings</a></button></li>
-            <li><button><a href="{{ url_for('stats') }}">Your Stats</a></button></li>
-            <li><button><a href="{{ url_for('clock') }}">Study Sessions</a></button></li>
-            <li><button><a href="{{ url_for('dashboard') }}">Home</a></button></li>
-            <li><button><a href="{{ url_for('logout') }}">Logout</a></button></li>
-        </ul>
-    </nav>
-
 <main>
-    <div style="max-width: 800px; margin: 0 auto; padding: 20px;">
-        <h1 style="text-align: center; margin-bottom: 20px;">Assignment Tracker</h1>
-        <p>Logged in as <strong>{{ user.username }}</strong> (#{{ user.tag }})</p>
-        <form action="{{ url_for('add_assignment') }}" method="POST" style="background: #c0c0c0; border: 3px outset #fff; padding: 20px; margin-bottom: 20px;">
-            <label>Assignment Name:</label><br>
-            <input type="text" name="task" required style="width: 100%; margin-bottom: 10px;"><br>
-            <label>Due Date:</label><br>
-            <input type="date" name="due" required style="margin-bottom: 10px;"><br>
-            <label>Difficulty:</label><br>
-            <select name="difficulty" style="margin-bottom: 10px; width: 100%;">
-                <option value="Easy">Easy</option>
-                <option value="Medium">Medium</option>
-                <option value="Hard">Hard</option>
-            </select><br>
-            <button type="submit">Add Assignment</button>
-        </form>
-
-        <div style="display: flex; flex-wrap: wrap; gap: 20px;">
-            {% for item in assignments %}
-            <div class="task-card{% if item.completed %} completed{% endif %}">
-                <div class="task-card-badge">
-                    <span style="background: {% if item.difficulty == 'Hard' %}#ff0000{% elif item.difficulty == 'Medium' %}#ffff00{% else %}#00ff00{% endif %};">
-                        {{ item.difficulty }}
-                    </span>
-                </div>
-                <p class="task-status">{{ 'Completed' if item.completed else 'Pending' }}</p>
-                <h3>{{ item.task }}</h3>
-                <p class="due-text">Due: <span class="due-date">{{ item.due }}</span></p>
-                <form action="{{ url_for('edit_assignment', assignment_id=item.id) }}" method="POST" class="task-card-edit">
-                    <input type="date" name="due" value="{{ item.due }}" required>
-                    <button type="submit" class="task-button task-edit-button">Edit Date</button>
-                </form>
-                <div class="task-card-actions">
-                    {% if not item.completed %}
-                    <form action="{{ url_for('complete_assignment', assignment_id=item.id) }}" method="POST">
-                        <button type="submit" class="task-button task-complete-button">Complete</button>
-                    </form>
-                    {% else %}
-                    <button type="button" class="task-button task-completed-button" disabled>Completed</button>
-                    {% endif %}
-                    <form action="{{ url_for('delete_assignment', assignment_id=item.id) }}" method="POST">
-                        <button type="submit" class="task-button task-delete-button">Delete</button>
-                    </form>
-                </div>
-            </div>
-            {% endfor %}
+        <div>
+            <h1 style="font-size: 2rem; text-align: center; margin-top: -250px">Completely Radical Assignment Planner (C.R.A.P)</h1>
+            <p style="font-size: 2rem; text-align: center; margin-top: -20px">Copyright 2026-2033</p>
+            <p style="font-size: 2rem; text-align: center; margin-top: 20px">- - - Terminal 1 - - -</p>
+            <p style="margin: 30px 0 20px; line-height: 1.6; font-size: 1rem;">
+        Welcome to C.R.A.P, a student-centered website that allows them to manage and track tasks easily.
+            </p>
+            <ul style="list-style: none; padding: 0; margin: 0; font-size: 1.3rem;">
+                <li style="margin: 10px 0;">&gt; <a href="{{ url_for('register') }}">Register</a></li>
+                <li style="margin: 10px 0;">&gt; <a href="{{ url_for('login') }}">Log In</a></li>
+                <li style="margin: 10px 0;">&gt; <a href="{{ url_for('more') }}">More about us</a></li>
+                <li style="margin: 10px 0;">&gt; <a href="{{ url_for('help') }}">Help!</a></li>
+            </ul>
         </div>
-    </div>
-</main>
-</body>
-</html>
+    </main>

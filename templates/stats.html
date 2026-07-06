@@ -6,15 +6,14 @@
     <title>Your Stats</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-<body class="{{ 'dark' if user and user.dark_mode else '' }}">
+<body>
     <nav>
         <ul>
-            <li><button><a href="{{ url_for('home') }}">Back to Assignments</a></button></li>
+            <li><button><a href="{{ url_for('home') }}">Home</a></button></li>
             <li><button><a href="{{ url_for('profile') }}">Profile</a></button></li>
-            <li><button><a href="{{ url_for('clock') }}">Study Sessions</a></button></li>
+            <li><button><a href="{{ url_for('dashboard') }}">Tasks</a></button></li>
             <li><button><a href="{{ url_for('settings') }}">Settings</a></button></li>
-            <li><button><a href="{{ url_for('logout') }}">Logout</a></button></li>
-            <li><button><a href="{{ url_for('delete_account') }}">Delete Account</a></button></li>
+            <li><button><a href="{{ url_for('clock') }}">Study Sessions</a></button></li>
         </ul>
     </nav>
     <main>
@@ -36,11 +35,16 @@
                 <ol class="leaderboard-list">
                     {% for row in leaderboard %}
                     <li>
-                        <strong>{{ loop.index }}.</strong>
-                        {{ row.username }}
-                        <div class="leaderboard-meta">
-                            <span>{{ row.total_assignments }} tasks</span>
-                            <span>{{ row.completion_rate }}%</span>
+                        <div class="leaderboard-avatar-box">
+                            <img src="{{ row.pfp_url if row.pfp_url.startswith('/') else url_for('static', filename=row.pfp_url) }}" alt="{{ row.username }}'s photo">
+                        </div>
+                        <div class="leaderboard-item-content">
+                            <strong>{{ loop.index }}.</strong>
+                            {{ row.username }}
+                            <div class="leaderboard-meta">
+                                <span>{{ row.total_assignments }} tasks</span>
+                                <span>{{ row.completion_rate }}%</span>
+                            </div>
                         </div>
                     </li>
                     {% endfor %}

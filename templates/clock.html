@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forest Study Station</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav>
+        <ul>
+            <li><button><a href="{{ url_for('home') }}">Home</a></button></li>
+            <li><button><a href="{{ url_for('profile') }}">Profile</a></button></li>
+            <li><button><a href="{{ url_for('dashboard') }}">Tasks</a></button></li>
+            <li><button><a href="{{ url_for('stats') }}">Your Stats</a></button></li>
+            <li><button><a href="{{ url_for('settings') }}">Settings</a></button></li>
+        </ul>
+    </nav>
+
+    <main class="clock-main">
+        <div class="clock-display panel">
+            <h1 id="digital-clock">00:00:00</h1>
+            <div id="current-date">MONDAY, MAY 05</div>
+        </div>
+
+        <div class="clock-panels">
+            <div class="task-panel panel">
+                <h6>Study Progress</h6>
+                <div class="task-input-row">
+                    <input type="text" id="taskInput" class="task-input" placeholder="New Task...">
+                    <button class="btn-custom" onclick="addTask()">+</button>
+                </div>
+                <div id="taskList"></div>
+            </div>
+
+            <div class="stopwatch-panel panel">
+                <span id="sw-display">00:00:00</span>
+                <div class="clock-panel-row">
+                    <button id="startBtn" class="btn-custom" onclick="toggleSW()">Start Study</button>
+                    <button class="btn-custom secondary" onclick="resetSW()">Reset</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // 1. Clock & Date Logic
+        function updateClock() {
+            const now = new Date();
+            const h = String(now.getHours()).padStart(2, '0');
+            const m = String(now.getMinutes()).padStart(2, '0');
+            const s = String(now.getSeconds()).padStart(2, '0');
+            document.getElementById('digital-clock').innerText = `${h}:${m}:${s}`;
+
+            const options = { weekday: 'long', month: 'long', day: 'numeric' };
+            document.getElementById('current-date').innerText = now.toLocaleDateString(undefined, options).toUpperCase();
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // 2. Stopwatch Logic (FIXED RESET)
+        let startTime, timerInterval, elapsedTime = 0, isRunning = false;
+
+        function toggleSW() {
+            if (!isRunning) {
+                startTime = Date.now() - elapsedTime;
+                timerInterval = setInterval(() => {
+                    elapsedTime = Date.now() - startTime;
+                    updateDisplay();
+                }, 100);
+                document.getElementById('startBtn').innerText = "Pause";
+                isRunning = true;
+            } else {
+                clearInterval(timerInterval);
+                document.getElementById('startBtn').innerText = "Resume";
+                isRunning = false;
+            }
+        }
+
+        function resetSW() {
+            clearInterval(timerInterval);
+            elapsedTime = 0;
+            isRunning = false;
+            updateDisplay();
+            document.getElementById('startBtn').innerText = "Start Study";
+        }
+
+        function updateDisplay() {
+            let totalSeconds = Math.floor(elapsedTime / 1000);
+            let h = Math.floor(totalSeconds / 3600);
+            let m = Math.floor((totalSeconds % 3600) / 60);
+            let s = totalSeconds % 60;
+            document.getElementById('sw-display').innerText = 
+                `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+        }
+
+        // 3. Task List Logic
+        function addTask() {
+            const input = document.getElementById('taskInput');
+            if (input.value.trim() === "") return;
+
+            const taskList = document.getElementById('taskList');
+            const div = document.createElement('div');
+            div.className = "task-item";
+            div.innerHTML = `
+                <input type="checkbox" onchange="this.nextSibling.classList.toggle('completed')">
+                <span>${input.value}</span>
+            `;
+            taskList.appendChild(div);
+            input.value = "";
+        }
+    </script>
+</body>
+</html>

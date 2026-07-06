@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>assignment tracker</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <nav>
+        <ul>
+            <li><button><a href="{{ url_for('home') }}">Home</a></button></li>
+            <li><button><a href="{{ url_for('profile') }}">Profile</a></button></li>
+            <li><button><a href="{{ url_for('clock') }}">Study Sessions</a></button></li>
+            <li><button><a href="{{ url_for('settings') }}">Settings</a></button></li>
+            <li><button><a href="{{ url_for('stats') }}">Stats</a></button></li>
+        </ul>
+    </nav>
+
+<main>
+    <div style="max-width: 800px; margin: 0 auto; padding: 20px;">
+        <h1 style="text-align: center; margin-bottom: 20px;">C . R . A . P</h1>
+        <p>What it do, <strong>{{ user.username }}</strong>?</p>
+        <form action="{{ url_for('add_assignment') }}" method="POST" style="background: #154728; color: #00ffb7; border: 3px outset #00ffb7; padding: 20px; margin-bottom: 20px;">
+            <label>Assignment Name:</label><br>
+            <input type="text" name="task" required style="width: 100%; margin-bottom: 10px; font-family: 'radiohead', sans-serif; background: #111; color: #00ffb7; border: 1px solid #444;"><br>
+            <label>Due Date:</label><br>
+            <input type="date" name="due" required style="margin-bottom: 10px; font-family: 'radiohead', sans-serif; background: #111; color: #00ffb7; border: 1px solid #444;"><br>
+            <label>Difficulty:</label><br>
+            <select name="difficulty" style="margin-bottom: 10px; width: 100%; font-family: 'radiohead', sans-serif; background: #111; color: #00ffb7; border: 1px solid #444;">
+                <option value="Easy">Easy</option>
+                <option value="Medium">Medium</option>
+                <option value="Hard">Hard</option>
+            </select><br>
+            <button type="submit">Add Assignment</button>
+        </form>
+
+        <div style="display: flex; flex-wrap: wrap; gap: 20px;">
+            {% for item in assignments %}
+            <div class="task-card{% if item.completed %} completed{% endif %}">
+                <div class="task-card-badge">
+                    <span class="difficulty-{{ item.difficulty.lower() }}">
+                        {{ item.difficulty }}
+                    </span>
+                </div>
+                <p class="task-status">{{ 'Completed' if item.completed else 'Pending' }}</p>
+                <h3>{{ item.task }}</h3>
+                <p class="due-text">Due: <span class="due-date">{{ item.due }}</span></p>
+                <form action="{{ url_for('edit_assignment', assignment_id=item.id) }}" method="POST" class="task-card-edit">
+                    <input type="date" name="due" value="{{ item.due }}" required; style=" font-family: 'radiohead', sans-serif; background: #111; color: #00ffb7; border: 1px solid #444;">
+                    <button type="submit" class="task-button task-edit-button">Edit Date</button>
+                </form>
+                <div class="task-card-actions">
+                    {% if not item.completed %}
+                    <form action="{{ url_for('complete_assignment', assignment_id=item.id) }}" method="POST">
+                        <button type="submit" class="task-button task-complete-button">Complete</button>
+                    </form>
+                    {% else %}
+                    <form action="{{ url_for('archive_assignment', assignment_id=item.id) }}" method="POST">
+                        <button type="submit" class="task-button task-archive-button">Archive</button>
+                    </form>
+                    {% endif %}
+                    <form action="{{ url_for('delete_assignment', assignment_id=item.id) }}" method="POST">
+                        <button type="submit" class="task-button task-delete-button">Delete</button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</main>
+</body>
+</html>
