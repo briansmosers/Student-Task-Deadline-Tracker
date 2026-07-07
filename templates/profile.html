@@ -25,7 +25,7 @@
             <div class="pfp-container">
                 <img src="{{ user.pfp_url if user.pfp_url.startswith('/') else url_for('static', filename=user.pfp_url) }}" alt="Profile Photo">
             </div>
-            <p>Tag: <span style="color: rgb(0, 131, 140);">#{{ user.tag }}</span></p>
+            <p>Tag: <span style="color: rgb(136, 255, 223);">#{{ user.tag }}</span></p>
             <p>Username: <strong>{{ user.username }}</strong></p>
             <hr>
             <form method="POST" enctype="multipart/form-data">
@@ -42,7 +42,7 @@
                     <li>
                         <strong>{{ item.task }}</strong>
                         <div>
-                            Due: {{ item.due }} &bull; {{ item.difficulty }}
+                            Due: {{ item.due }} &gt; {{ item.difficulty }}
                         </div>
                     </li>
                     {% endfor %}

@@ -6,6 +6,19 @@
     <title>Forest Study Station</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
+<style>
+    body {
+        background-image: url('{{ url_for('static', filename='new vegas.png') }}');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+    }
+
+    .clock-main {
+        background: transparent;
+    }
+</style>
 <body>
     <nav>
         <ul>
@@ -20,7 +33,7 @@
     <main class="clock-main">
         <div class="clock-display panel">
             <h1 id="digital-clock">00:00:00</h1>
-            <div id="current-date">MONDAY, MAY 05</div>
+            <div id="current-date" style="font-family: 'radiohead', sans-serif">MONDAY, MAY 05</div>
         </div>
 
         <div class="clock-panels">

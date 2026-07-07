@@ -21,7 +21,6 @@ a:visited {
     font-family: 'radiohead', sans-serif;
 }
 
-/* Theme variables */
 :root {
     --bg: #1a231a;
     --panel: #154728;
@@ -81,6 +80,53 @@ main {
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.hologram-card-row {
+    display: flex;
+    gap: 70px;
+    margin-bottom: -250px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.hologram-card {
+    position: relative;
+    width: 240px;
+    overflow: hidden;
+    background: #1a231a;
+    backdrop-filter: blur(4px);
+    animation: float-card 5s ease-in-out infinite;
+    z-index: 10;
+}
+
+.hologram-card img {
+    display: block;
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+    filter: saturate(1.2) contrast(1.1);
+}
+
+.hologram-card__overlay {
+    display: fit-content;
+    gap: 4px;
+    padding: 10px 12px;
+    color: #00ffbb;
+    font-family: 'monofonto', monospace;
+    text-align: center;
+}
+
+.hologram-card__overlay p2 {
+    font-size: 0.9rem;
+    color: #91b4a4;
+}
+
+@keyframes float-card {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-8px); }
 }
 
 .stats-grid {
@@ -261,6 +307,17 @@ nav button {
     flex-wrap: wrap;
     justify-content: center;
     gap: 30px;
+    margin-top: auto;
+    padding-top: 20px;
+}
+
+.task-panel {
+    margin-right: auto;
+    align-self: flex-end;
+}
+
+.stopwatch-panel {
+    margin-left: auto;
 }
 
 .task-panel,
@@ -357,7 +414,8 @@ nav button {
 }
 
 .btn-custom.secondary {
-    background: #b8c3b4;
+    background: #90cba0;
+    color:#5f665f;
 }
 
 .task-input-row .btn-custom {
